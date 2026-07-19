@@ -1,0 +1,76 @@
+{
+  "main": [
+    {
+      "name": "Espresso",
+      "description": "A rich, balanced double shot.",
+      "price": "$3.50"
+    },
+    {
+      "name": "Americano",
+      "description": "Espresso finished with hot water.",
+      "price": "$4.00"
+    },
+    {
+      "name": "Latte",
+      "description": "Espresso with silky steamed milk.",
+      "price": "$5.25"
+    },
+    {
+      "name": "Cappuccino",
+      "description": "Espresso, steamed milk, and airy foam.",
+      "price": "$4.75"
+    },
+    {
+      "name": "Cold Brew",
+      "description": "Smooth, slow-steeped, and served over ice.",
+      "price": "$4.75"
+    },
+    {
+      "name": "Matcha Latte",
+      "description": "Premium matcha whisked with your choice of milk.",
+      "price": "$5.50"
+    },
+    {
+      "name": "Chai Latte",
+      "description": "Warm spices blended with steamed milk.",
+      "price": "$5.25"
+    },
+    {
+      "name": "Hot Tea",
+      "description": "A rotating selection of comforting teas.",
+      "price": "$3.75"
+    },
+    {
+      "name": "Fresh Pastry",
+      "description": "Ask about today’s scones, rolls, and baked treats.",
+      "price": "Market"
+    },
+    {
+      "name": "Flavor Add-On",
+      "description": "Add a house flavor to any drink.",
+      "price": "+$0.75"
+    }
+  ],
+  "seasonal": [
+    {
+      "name": "Spring Matcha",
+      "description": "Bright matcha with a soft floral finish.",
+      "price": "$6.25"
+    },
+    {
+      "name": "Black Sugar Latte",
+      "description": "Espresso, milk, and caramelized black sugar.",
+      "price": "$6.25"
+    },
+    {
+      "name": "Butter Cream Iced Coffee",
+      "description": "Chilled coffee topped with velvety cream.",
+      "price": "$6.00"
+    },
+    {
+      "name": "Seasonal Scone",
+      "description": "A rotating flavor, baked fresh while supplies last.",
+      "price": "$4.25"
+    }
+  ]
+}
