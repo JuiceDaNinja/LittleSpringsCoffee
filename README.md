@@ -1,43 +1,39 @@
-# Little Springs Coffee — polished photo gallery version
+# Little Springs Coffee — Instagram profile version
 
-This static website is ready for GitHub Pages and does not require an Instagram access token.
+This static website is ready for GitHub Pages.
 
-## What changed
+## Instagram setup
 
-The site no longer uses Instagram iframe embeds. The GitHub Action now:
+The site now shows the public Instagram profile directly through Instagram's
+official embed script and also includes a normal link to the profile.
 
-1. Reads the newest public posts from the Instagram profile.
-2. Downloads the post preview images into `assets/instagram/`.
-3. Updates `data/instagram-posts.json`.
-4. Commits the images and JSON file back to the repository.
+No access token, API key, GitHub Action, image downloader, scheduled workflow,
+or locally stored Instagram photos are required.
 
-The website displays those local images in a fast, responsive gallery. Clicking an image opens its original Instagram post.
+Instagram profile:
 
-## First-time setup
+https://www.instagram.com/_littlespringscoffee_ma/
 
-1. Upload all files and folders to a GitHub repository.
+## Upload to GitHub Pages
+
+1. Upload all files from this folder to the root of your GitHub repository.
 2. Open **Settings → Pages**.
-3. Choose **Deploy from a branch**.
-4. Select `main` and `/ (root)`.
-5. Open the **Actions** tab.
-6. Select **Update Instagram gallery**.
-7. Click **Run workflow**.
+3. Under **Build and deployment**, choose **Deploy from a branch**.
+4. Select the `main` branch and `/ (root)`.
+5. Save.
 
-The first workflow run is required to download the initial gallery images. No token, password, Meta app, or GitHub Secret is needed.
+## Important
 
-After the first successful run, images will be stored in:
+The Instagram account must remain public and website embedding must be enabled
+in the Instagram account settings.
 
-```text
-assets/instagram/
-```
-
-The site checks for new public posts every six hours.
+Some browsers, Brave Shields, tracking protection, cookie blocking, or content
+blockers may prevent Instagram's embed from loading. The site always includes
+an **Open Instagram profile** button as a fallback.
 
 ## Local preview
 
-Before the first workflow run, the site shows a clean gallery placeholder.
-
-After the workflow has downloaded the photos, clone or download the updated repository and run:
+Run:
 
 ```bash
 python -m http.server 8000
@@ -49,28 +45,10 @@ Then open:
 http://localhost:8000
 ```
 
-Do not double-click `index.html` and open it through `file://`, because browsers commonly block local JSON requests.
-
-## Reliability note
-
-Instagram does not provide a guaranteed token-free API for listing a profile's latest posts. This project uses public profile data without logging in. Instagram may occasionally rate-limit or change this endpoint.
-
-If an update fails, the workflow preserves the previously downloaded images and feed file, so the live website continues displaying the last successful gallery.
-
-## Update the menu
+## Menu updates
 
 Edit:
 
 ```text
 data/menu.json
 ```
-
-## Change the Instagram account
-
-Edit `INSTAGRAM_USERNAME` inside:
-
-```text
-.github/workflows/update-instagram.yml
-```
-
-The profile must be public.

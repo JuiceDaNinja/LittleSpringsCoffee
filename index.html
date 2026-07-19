@@ -6,8 +6,7 @@
   <meta name="description" content="Little Springs Coffee in West Springfield, Massachusetts. Handcrafted coffee, matcha, seasonal drinks, pastries, and neighborhood warmth.">
   <meta name="theme-color" content="#20342a">
   <meta property="og:title" content="Little Springs Coffee">
-  <meta property="og:description" content="THIS IS TESTING PAGE!">
-  <!-- <meta property="og:description" content="A little joy in every cup. Visit Little Springs Coffee in West Springfield, MA."> -->
+  <meta property="og:description" content="A little joy in every cup. Visit Little Springs Coffee in West Springfield, MA.">
   <meta property="og:type" content="website">
   <title>Little Springs Coffee</title>
 
@@ -101,12 +100,21 @@
             <span>Newest post</span>
             <span id="hero-feed-status">Live from Instagram</span>
           </div>
-          <div class="hero-photo-stage" id="hero-instagram">
-            <div class="gallery-placeholder">
-              <span class="spinner" aria-hidden="true"></span>
-              <p>Loading the newest post…</p>
-            </div>
+          <div class="instagram-profile-hero" id="hero-instagram">
+            <div class="profile-mark" aria-hidden="true">◎</div>
+            <p class="profile-kicker">Follow our daily coffee moments</p>
+            <h2>@_littlespringscoffee_ma</h2>
+            <p>
+              Seasonal drinks, fresh pastries, shop updates, and behind-the-scenes
+              moments from Little Springs Coffee.
+            </p>
+            <a class="button button-primary"
+               href="https://www.instagram.com/_littlespringscoffee_ma/"
+               target="_blank" rel="noopener">
+              Open Instagram profile ↗
+            </a>
           </div>
+        </div>
         </div>
       </div>
     </section>
@@ -203,12 +211,26 @@
           </div>
         </div>
 
-        <div class="photo-grid" id="instagram-feed" aria-live="polite">
-          <div class="feed-loading">
-            <span class="spinner" aria-hidden="true"></span>
-            <p>Loading Instagram photos…</p>
-          </div>
-        </div>
+        <div class="instagram-profile-embed" id="instagram-feed">
+          <blockquote
+            class="instagram-media"
+            data-instgrm-permalink="https://www.instagram.com/_littlespringscoffee_ma/"
+            data-instgrm-version="14">
+            <div class="instagram-embed-fallback">
+              <div class="profile-mark" aria-hidden="true">◎</div>
+              <h3>Little Springs Coffee on Instagram</h3>
+              <p>
+                View our newest posts, Reels, announcements, and seasonal drinks
+                directly on Instagram.
+              </p>
+              <a class="button button-primary"
+                 href="https://www.instagram.com/_littlespringscoffee_ma/"
+                 target="_blank" rel="noopener">
+                View @_littlespringscoffee_ma ↗
+              </a>
+            </div>
+          </blockquote>
+        </div></div>
 
         <p class="last-updated" id="feed-updated"></p>
       </div>
@@ -285,5 +307,6 @@
       </div>
     </div>
   </footer>
+  <script async src="https://www.instagram.com/embed.js"></script>
 </body>
 </html>
