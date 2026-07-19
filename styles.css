@@ -429,6 +429,7 @@ h1 em, h2 em {
 .marquee-section {
   padding: 0;
   overflow: hidden;
+  align-items: center;
   border-top: 1px solid var(--line);
   border-bottom: 1px solid var(--line);
   background: var(--paper);
