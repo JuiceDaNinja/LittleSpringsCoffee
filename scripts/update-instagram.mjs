@@ -1,4 +1,4 @@
-import { mkdir, readdir, readFile, rm, writeFile } from "node:fs/promises";
+import { mkdir, readdir, rm, writeFile } from "node:fs/promises";
 import { extname } from "node:path";
 import process from "node:process";
 
@@ -14,18 +14,14 @@ try {
   const profile = await fetchPublicProfile(profileEndpoint);
   const nodes = extractNodes(profile).slice(0, maxPosts);
 
-  if (!nodes.length) {
-    throw new Error("Instagram returned no public posts.");
-  }
+  if (!nodes.length) throw new Error("Instagram returned no public posts.");
 
   await mkdir(imageDirectory, { recursive: true });
-
   const posts = [];
 
   for (let index = 0; index < nodes.length; index += 1) {
     const node = nodes[index];
     const imageUrl = chooseImageUrl(node);
-
     if (!imageUrl) continue;
 
     const extension = chooseExtension(imageUrl);
@@ -48,9 +44,7 @@ try {
     });
   }
 
-  if (!posts.length) {
-    throw new Error("No downloadable public Instagram images were returned.");
-  }
+  if (!posts.length) throw new Error("No downloadable public Instagram images were returned.");
 
   await removeUnusedImages(new Set(posts.map((post) => post.image.split("/").pop())));
 
@@ -64,37 +58,60 @@ try {
   await writeFile(outputPath, `${JSON.stringify(next, null, 2)}\n`, "utf8");
   console.log(`Saved ${posts.length} Instagram gallery images for @${username}.`);
 } catch (error) {
+  const message = error instanceof Error ? error.message : String(error);
+
+  if (message.includes("HTTP 429")) {
+    console.log("::warning title=Instagram rate limit::Instagram returned HTTP 429. Existing gallery files were preserved. The workflow will try again at the next scheduled run.");
+    process.exit(0);
+  }
+
   console.error("Instagram update failed. Existing gallery files were preserved.");
-  console.error(error instanceof Error ? error.message : error);
+  console.error(message);
   process.exit(1);
 }
 
 async function fetchPublicProfile(url) {
-  const response = await fetch(url, {
-    redirect: "follow",
-    headers: {
-      "Accept": "application/json, text/plain, */*",
-      "Accept-Language": "en-US,en;q=0.9",
-      "Referer": `https://www.instagram.com/${encodeURIComponent(username)}/`,
-      "User-Agent":
-        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
-        "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
-      "X-IG-App-ID": "936619743392459",
-      "X-Requested-With": "XMLHttpRequest"
+  const attempts = 3;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    const response = await fetch(url, {
+      redirect: "follow",
+      headers: {
+        Accept: "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        Referer: `https://www.instagram.com/${encodeURIComponent(username)}/`,
+        "User-Agent":
+          "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
+          "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "X-IG-App-ID": "936619743392459",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    });
+
+    const text = await response.text();
+
+    if (response.ok) {
+      try {
+        return JSON.parse(text);
+      } catch {
+        throw new Error("Instagram returned a non-JSON response.");
+      }
     }
-  });
 
-  const text = await response.text();
+    if (response.status !== 429 || attempt === attempts) {
+      throw new Error(`Instagram returned HTTP ${response.status}: ${text.slice(0, 220)}`);
+    }
 
-  if (!response.ok) {
-    throw new Error(`Instagram returned HTTP ${response.status}: ${text.slice(0, 220)}`);
+    const retryAfter = Number(response.headers.get("retry-after"));
+    const delaySeconds = Number.isFinite(retryAfter)
+      ? Math.min(Math.max(retryAfter, 10), 60)
+      : attempt * 20;
+
+    console.log(`Instagram rate-limited attempt ${attempt}/${attempts}; retrying in ${delaySeconds} seconds.`);
+    await sleep(delaySeconds * 1000);
   }
 
-  try {
-    return JSON.parse(text);
-  } catch {
-    throw new Error("Instagram returned a non-JSON response.");
-  }
+  throw new Error("Instagram returned HTTP 429 after all retry attempts.");
 }
 
 function extractNodes(payload) {
@@ -111,9 +128,7 @@ function extractNodes(payload) {
     .filter((node, index, all) =>
       all.findIndex((candidate) => candidate.shortcode === node.shortcode) === index
     )
-    .sort((a, b) =>
-      Number(b.taken_at_timestamp || 0) - Number(a.taken_at_timestamp || 0)
-    );
+    .sort((a, b) => Number(b.taken_at_timestamp || 0) - Number(a.taken_at_timestamp || 0));
 }
 
 function chooseImageUrl(node) {
@@ -121,7 +136,6 @@ function chooseImageUrl(node) {
   if (Array.isArray(resources) && resources.length) {
     return resources[resources.length - 1]?.src || resources[0]?.src || "";
   }
-
   return node.display_url || node.thumbnail_src || node.thumbnail_url || "";
 }
 
@@ -129,16 +143,14 @@ async function downloadImage(url, destination) {
   const response = await fetch(url, {
     redirect: "follow",
     headers: {
-      "Referer": "https://www.instagram.com/",
+      Referer: "https://www.instagram.com/",
       "User-Agent":
         "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
         "(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
     }
   });
 
-  if (!response.ok) {
-    throw new Error(`Image download failed with HTTP ${response.status}.`);
-  }
+  if (!response.ok) throw new Error(`Image download failed with HTTP ${response.status}.`);
 
   const contentType = response.headers.get("content-type") || "";
   if (!contentType.startsWith("image/")) {
@@ -146,16 +158,12 @@ async function downloadImage(url, destination) {
   }
 
   const bytes = Buffer.from(await response.arrayBuffer());
-  if (bytes.length < 1000) {
-    throw new Error("Downloaded image was unexpectedly small.");
-  }
-
+  if (bytes.length < 1000) throw new Error("Downloaded image was unexpectedly small.");
   await writeFile(destination, bytes);
 }
 
 async function removeUnusedImages(keep) {
   const files = await readdir(imageDirectory);
-
   await Promise.all(
     files
       .filter((name) => name !== ".gitkeep" && !keep.has(name))
@@ -168,11 +176,8 @@ function buildAltText(node, index) {
     node?.edge_media_to_caption?.edges?.[0]?.node?.text ||
     node?.caption?.text ||
     "";
-
   const cleaned = caption.replace(/\s+/g, " ").trim();
-  return cleaned
-    ? cleaned.slice(0, 150)
-    : `Little Springs Coffee Instagram post ${index + 1}`;
+  return cleaned ? cleaned.slice(0, 150) : `Little Springs Coffee Instagram post ${index + 1}`;
 }
 
 function chooseExtension(url) {
@@ -192,4 +197,8 @@ function toIsoTimestamp(value) {
 function clamp(value, min, max) {
   if (!Number.isFinite(value)) return min;
   return Math.min(Math.max(Math.trunc(value), min), max);
+}
+
+function sleep(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
