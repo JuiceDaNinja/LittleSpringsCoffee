@@ -2,7 +2,8 @@ name: Update Instagram gallery
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    # Once daily at 1:17 PM UTC to reduce Instagram rate limiting.
+    - cron: "17 13 * * *"
   workflow_dispatch:
 
 permissions:
@@ -15,7 +16,7 @@ concurrency:
 jobs:
   update:
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 10
 
     steps:
       - name: Check out repository
@@ -25,7 +26,6 @@ jobs:
         uses: actions/setup-node@v5
         with:
           node-version: "24"
-          package-manager-cache: false
 
       - name: Download latest public Instagram photos
         env:
@@ -36,7 +36,7 @@ jobs:
       - name: Commit updated gallery
         run: |
           if git diff --quiet -- data/instagram-posts.json assets/instagram; then
-            echo "Instagram gallery is already current."
+            echo "No gallery changes to commit."
             exit 0
           fi
 
